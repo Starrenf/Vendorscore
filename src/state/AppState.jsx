@@ -1,0 +1,159 @@
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { supabase as getSupabase, resetSupabaseClient } from "../lib/supabase";
+import { getRuntimeConfig } from "../lib/runtimeConfig";
+
+const AppCtx = createContext(null);
+
+export function AppStateProvider({ children }) {
+  const [session, setSession] = useState(null);
+  const [organization, setOrganization] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const sb = getSupabase();
+
+  function clearAuthAndState(reason) {
+    try {
+      window?.localStorage?.removeItem("VENDORSCORE_ORG_ID");
+      window?.localStorage?.removeItem("vendorscore-auth");
+    } catch {
+      // ignore
+    }
+    // Reset singleton client to avoid reusing a poisoned refresh token
+    try { resetSupabaseClient(); } catch {}
+
+    setSession(null);
+    setOrganization(null);
+
+    // Optional hard redirect to break any render/route loops.
+    // Only do this when we are not already on /login.
+    try {
+      const path = window?.location?.pathname || "";
+      if (!path.startsWith("/login")) {
+        window.location.href = `/login?reason=${encodeURIComponent(reason || "session")}`;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      setLoading(true);
+      const cfg = getRuntimeConfig();
+      if (!cfg.url || !cfg.anonKey) {
+        setSession(null);
+        setOrganization(null);
+        setLoading(false);
+        return;
+      }
+      const client = getSupabase();
+      if (!client) {
+        setLoading(false);
+        return;
+      }
+      const { data, error: sessionErr } = await client.auth.getSession();
+      if (sessionErr) {
+        // Common when a stale/invalid refresh_token is cached. Fail-safe: clear and force re-login.
+        clearAuthAndState(sessionErr?.message || "refresh_token");
+        setLoading(false);
+        return;
+      }
+      if (cancelled) return;
+      setSession(data.session ?? null);
+
+      const { data: listener } = client.auth.onAuthStateChange((event, s) => {
+        try {
+        // If token refresh fails (common when a stale/rotated refresh token is cached),
+        // immediately clear state so the UI doesn't "pretend" saves worked.
+        if (event === "TOKEN_REFRESH_FAILED") {
+          setSession(null);
+          setOrganization(null);
+          window.localStorage.removeItem("VENDORSCORE_ORG_ID");
+          // Also clear the auth cache key we configured on the client.
+          window.localStorage.removeItem("vendorscore-auth");
+          return;
+        }
+        if (event === "SIGNED_OUT") {
+          setOrganization(null);
+          window.localStorage.removeItem("VENDORSCORE_ORG_ID");
+        }
+        setSession(s);
+        } catch (e) {
+          // ultra defensive: never let auth listener crash the app
+          clearAuthAndState(e?.message || "auth_listener");
+        }
+      });
+
+      // Always prefer the org stored on the user's profile.
+      // This avoids "ghost" org selections from localStorage that can cause
+      // confusing behaviour for new users (and, in some setups, RLS recursion).
+      if (data.session) {
+        const { data: prof, error: profErr } = await client
+          .from("profiles")
+          .select("organization_id")
+          .eq("id", data.session.user.id)
+          .maybeSingle();
+
+        if (!profErr && prof?.organization_id) {
+          const { data: org, error: orgErr } = await client
+            .from("organizations")
+            .select("id,name,display_name,slug")
+            .eq("id", prof.organization_id)
+            .maybeSingle();
+
+          if (!orgErr && org) {
+            setOrganization(org);
+            window.localStorage.setItem("VENDORSCORE_ORG_ID", org.id);
+          }
+        } else {
+          // Not linked yet: clear any stale local selection.
+          window.localStorage.removeItem("VENDORSCORE_ORG_ID");
+          setOrganization(null);
+        }
+      }
+
+      setLoading(false);
+      return () => listener?.subscription?.unsubscribe();
+    }
+
+    init();
+    return () => { cancelled = true; };
+  }, [sb?.auth]);
+
+  function setOrg(org) {
+    setOrganization(org);
+    if (org?.id) window.localStorage.setItem("VENDORSCORE_ORG_ID", org.id);
+    else window.localStorage.removeItem("VENDORSCORE_ORG_ID");
+  }
+
+  async function signOut() {
+    const client = getSupabase();
+    if (!client) return;
+    await client.auth.signOut();
+    setOrg(null);
+  }
+
+  function hardResetClient() {
+    resetSupabaseClient();
+    window.location.reload();
+  }
+
+  const value = useMemo(() => ({
+    session,
+    organization,
+    setOrg,
+    loading,
+    signOut,
+    hardResetClient,
+  }), [session, organization, loading]);
+
+  return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;
+}
+
+export function useApp() {
+  const v = useContext(AppCtx);
+  if (!v) throw new Error("useApp must be used within AppStateProvider");
+  return v;
+}
