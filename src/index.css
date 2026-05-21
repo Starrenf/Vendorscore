@@ -1,0 +1,281 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  /* Huisstijl-accenten (Gilde Opleidingen) */
+  --gilde-blue: 0 58 143;   /* #003A8F */
+  --gilde-pink: 230 0 126;  /* #E6007E */
+}
+
+body { @apply text-slate-900 text-[15px] leading-relaxed bg-[#0b223f]; }
+
+a { @apply text-slate-900 underline-offset-4 hover:underline; }
+
+/* High-contrast input controls (white background, dark text, clearer border) */
+input, select, textarea {
+  @apply bg-white text-slate-900 border border-slate-300 rounded-xl px-3 py-2 outline-none;
+  @apply placeholder:text-slate-400;
+  /* Huisstijl-accent bij focus (blauw) en subtiele rode hint */
+  @apply focus:ring-2;
+  box-shadow:
+    0 0 0 2px rgba(var(--gilde-blue) / 0.20),
+    0 0 0 5px rgba(var(--gilde-pink) / 0.08);
+  border-color: rgba(148, 163, 184, 1);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(var(--gilde-blue) / 0.55);
+}
+
+label { @apply text-sm font-semibold text-slate-800; }
+
+.card { @apply bg-white border border-slate-200 rounded-2xl shadow-sm; }
+
+.btn { @apply inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50 active:bg-slate-100; }
+.btn-primary { @apply bg-[#003A8F] text-white border-[#003A8F] hover:bg-[#002f70] active:bg-[#00255a]; }
+.btn-accent { @apply bg-[#E6007E] text-white border-[#E6007E] hover:bg-[#c4006a] active:bg-[#a9005b]; }
+.btn-danger { @apply bg-rose-600 text-white border-rose-600 hover:bg-rose-700 active:bg-rose-800; }
+.badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs border border-slate-200 bg-slate-50; }
+
+
+/* Header nav buttons on dark background */
+.navbtn {
+  @apply inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-[0.95rem] font-semibold border border-white/15 text-white/85 bg-white/0 transition no-underline;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+@media (min-width: 1280px) {
+  .navbtn {
+    @apply px-4 py-2 text-sm;
+  }
+}
+.navbtn:hover { @apply bg-white/10 text-white; }
+.navbtn-active { @apply bg-white text-[#0c4f9f] border-white shadow-sm; }
+
+/* UI polish */
+.page-title { @apply text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900; }
+.page-subtitle { @apply text-sm md:text-base text-slate-600; }
+
+.section-card { @apply bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden; }
+.section-head { @apply px-5 py-4 flex items-center justify-between gap-3 bg-gradient-to-r from-white to-[#E8F0FB]; }
+.section-title { @apply text-lg font-bold text-[#003A8F]; }
+
+.row-zebra > :nth-child(odd) { @apply bg-white; }
+.row-zebra > :nth-child(even) { @apply bg-slate-50; }
+
+.sticky-bar { @apply fixed bottom-0 left-0 right-0 z-20; }
+.sticky-bar-inner { @apply max-w-6xl mx-auto px-4 pb-[env(safe-area-inset-bottom)] pt-3; }
+.sticky-bar-card { @apply bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-lg px-4 py-3 flex flex-wrap items-center justify-between gap-3; }
+
+
+/* --- Subtle professional micro-interactions (selective) --- */
+@media (hover: hover) and (pointer: fine) {
+  /* only clickable cards (cursor-pointer or Link wrappers) */
+  a.card,
+  .card.cursor-pointer,
+  .card[class*="cursor-pointer"] {
+    transition: transform 160ms ease, box-shadow 160ms ease;
+    will-change: transform;
+  }
+
+  a.card:hover,
+  .card.cursor-pointer:hover,
+  .card[class*="cursor-pointer"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.14);
+  }
+
+  /* only primary buttons (Gilde blue) */
+  button[class*="bg-[#003A8F]"],
+  a[class*="bg-[#003A8F]"] {
+    transition: box-shadow 140ms ease, filter 140ms ease;
+  }
+
+  button[class*="bg-[#003A8F]"]:hover,
+  a[class*="bg-[#003A8F]"]:hover {
+    filter: brightness(1.02);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.10);
+  }
+
+  button[class*="bg-[#003A8F]"]:active,
+  a[class*="bg-[#003A8F]"]:active {
+    filter: brightness(0.98);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.10);
+  }
+}
+
+/* optional: reusable glass panel */
+.glass-soft {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+}
+
+
+.vs-orb-wrap {
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.vs-orb-shadow {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -6px;
+  height: 12px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(8, 15, 36, 0.5), transparent 68%);
+  filter: blur(4px);
+  animation: orbFloatShadow 5.5s ease-in-out infinite;
+}
+
+.vs-orb-3d {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,0.96), rgba(255,255,255,0.18) 18%, transparent 28%),
+    radial-gradient(circle at 68% 70%, rgba(2, 6, 23, 0.40), transparent 36%),
+    radial-gradient(circle at 50% 55%, rgba(56,189,248,0.85), rgba(37,99,235,0.92) 48%, rgba(8,47,118,0.98) 76%, rgba(7,22,54,1) 100%);
+  box-shadow:
+    inset -12px -16px 24px rgba(7, 16, 35, 0.48),
+    inset 10px 12px 18px rgba(255,255,255,0.16),
+    0 14px 30px rgba(2, 6, 23, 0.35),
+    0 0 28px rgba(56, 189, 248, 0.18);
+  transform-style: preserve-3d;
+  animation: orbFloat 5.5s ease-in-out infinite, orbSpin 14s linear infinite;
+}
+
+
+.vs-orb-logo-shell {
+  position: absolute;
+  inset: 13%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  overflow: hidden;
+  z-index: 6;
+  transform: translateZ(22px);
+  background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.98), rgba(244,249,255,0.92) 55%, rgba(214,234,255,0.78) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    inset 0 -8px 16px rgba(37,99,235,0.12),
+    0 8px 18px rgba(2,6,23,0.22);
+}
+
+.vs-orb-logo-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 32% 24%, rgba(255,255,255,0.95), rgba(255,255,255,0.22) 42%, transparent 68%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.vs-orb-logo-shell::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow: 0 0 0 1px rgba(12,79,159,0.08);
+  pointer-events: none;
+}
+
+.vs-orb-logo-mark {
+  position: relative;
+  z-index: 1;
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  opacity: 1;
+  filter: drop-shadow(0 2px 3px rgba(255,255,255,0.28)) drop-shadow(0 8px 14px rgba(2,6,23,0.14));
+  transform: translateZ(18px);
+  pointer-events: none;
+}
+
+.vs-orb-core-glow {
+  position: absolute;
+  inset: 18%;
+  z-index: 2;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(125,211,252,0.55), rgba(59,130,246,0.10) 60%, transparent 72%);
+  filter: blur(2px);
+  animation: orbPulse 4.5s ease-in-out infinite;
+}
+
+.vs-orb-highlight {
+  position: absolute;
+  z-index: 7;
+  left: 18%;
+  top: 14%;
+  width: 34%;
+  height: 22%;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.08));
+  filter: blur(1px);
+  opacity: 0.95;
+  transform: rotate(-24deg) translateZ(12px);
+}
+
+.vs-orb-ring {
+  position: absolute;
+  left: -14%;
+  right: -14%;
+  top: 22%;
+  bottom: 22%;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255,255,255,0.42);
+  transform-style: preserve-3d;
+}
+
+.vs-orb-ring-back {
+  z-index: 1;
+  border-color: rgba(125, 211, 252, 0.18);
+  transform: rotateX(72deg) rotateY(22deg) rotateZ(10deg) translateZ(-8px);
+  filter: blur(0.4px);
+  animation: ringSpinBack 16s linear infinite;
+}
+
+.vs-orb-ring-front {
+  z-index: 8;
+  border-color: rgba(255,255,255,0.55);
+  box-shadow: 0 0 12px rgba(125, 211, 252, 0.12);
+  transform: rotateX(72deg) rotateY(22deg) rotateZ(10deg) translateZ(14px);
+  animation: ringSpinFront 12s linear infinite reverse;
+}
+
+@keyframes orbSpin {
+  from { transform: rotateY(0deg) rotateX(8deg); }
+  to { transform: rotateY(360deg) rotateX(8deg); }
+}
+
+@keyframes ringSpinFront {
+  from { transform: rotateX(72deg) rotateY(22deg) rotateZ(0deg) translateZ(14px); }
+  to { transform: rotateX(72deg) rotateY(22deg) rotateZ(360deg) translateZ(14px); }
+}
+
+@keyframes ringSpinBack {
+  from { transform: rotateX(72deg) rotateY(22deg) rotateZ(360deg) translateZ(-8px); }
+  to { transform: rotateX(72deg) rotateY(22deg) rotateZ(0deg) translateZ(-8px); }
+}
+
+@keyframes orbFloat {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -2px; }
+}
+
+@keyframes orbFloatShadow {
+  0%, 100% { opacity: 0.56; transform: scale(0.95); }
+  50% { opacity: 0.38; transform: scale(0.88); }
+}
+
+@keyframes orbPulse {
+  0%, 100% { opacity: 0.75; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+

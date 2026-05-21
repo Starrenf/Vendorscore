@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="120" viewBox="0 0 360 120" fill="none">
+  <rect width="360" height="120" rx="24" fill="white"/>
+  <rect x="1.5" y="1.5" width="357" height="117" rx="22.5" stroke="#E2E8F0" stroke-width="3"/>
+  <circle cx="56" cy="60" r="30" fill="#16a34a"/>
+  <text x="56" y="68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="white">Y</text>
+  <text x="104" y="56" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#0F172A">Yuverta</text>
+  <text x="104" y="82" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="500" fill="#64748B">MBO pilot / illustratief</text>
+</svg>
